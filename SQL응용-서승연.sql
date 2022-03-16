@@ -10,7 +10,7 @@ SHOW TABLES;
 
 CREATE TABLE 학과(
 	학과번호 VARCHAR(15) NOT NULL,
-    학과명 VARCHAR(20) NOT NULL UNIQUE,
+    학과명 VARCHAR(20) NOT NULL,
     학과전화번호 VARCHAR(20) NOT NULL UNIQUE,
     PRIMARY KEY (학과번호)
     );
@@ -138,12 +138,51 @@ SELECT 학생.학생번호 AS 학번, 학생.학생이름 AS 성명 FROM 학생 
 -- 5번 교수별 담당학생 명단
 SELECT 교수와학생.교수번호 AS 교번, 교수.교수이름 AS 교수자명, 교수와학생.학생번호 AS 학번, 학생.학생이름 AS 학생명 FROM 교수와학생 JOIN 교수 ON 교수와학생.교수번호=교수.교수번호  JOIN 학생 ON 교수와학생.학생번호=학생.학생번호 ORDER BY 교수.교수이름 ASC;
 
+
 -- 6번 컴퓨터학과 자료변경
+
+-- 변경전 작업
+ALTER TABLE 교수 DROP FOREIGN KEY 교수_ibfk_1;
+ALTER TABLE 학생 DROP FOREIGN KEY 학생_ibfk_1;
+
+-- 자료 변경
 SELECT * FROM 학과 ORDER BY 학과명 ASC;
-SET FOREIGN_KEY_CHECKS = 0;
-UPDATE 학과 SET 학과번호='0111', 학과명='컴퓨터공학과' WHERE 학과명='컴퓨터학과';
-SET FOREIGN_KEY_CHECKS = 1;
+UPDATE 학과 SET 학과.학과번호 = '0111', 학과.학과명 = '컴퓨터공학과' WHERE 학과.학과명 = '컴퓨터학과';
 SELECT * FROM 학과 ORDER BY 학과명 ASC;
+
+-- 변경후 되돌리기
+-- 데이터변경전 확인
+SELECT * FROM information_schema.table_constraints WHERE TABLE_NAME = '교수';
+SELECT * FROM information_schema.table_constraints WHERE TABLE_NAME = '학생';
+
+ALTER TABLE 교수 DROP 학과번호;
+ALTER TABLE 학생 DROP 학과번호;
+
+ALTER TABLE 교수 ADD 학과번호 VARCHAR(15) NOT NULL;
+ALTER TABLE 학생 ADD 학과번호 VARCHAR(15) NOT NULL;
+
+update 교수 set 학과번호 ='1001' where 교수번호='12345';
+update 교수 set 학과번호 ='2002' where 교수번호='23456';
+update 교수 set 학과번호 ='0111' where 교수번호='34567';
+update 교수 set 학과번호 ='4004' where 교수번호='45678';
+update 교수 set 학과번호 ='5005' where 교수번호='56789';
+
+update 학생 set 학과번호 ='1001' where 학생번호='10123';
+update 학생 set 학과번호 ='2002' where 학생번호='20234';
+update 학생 set 학과번호 ='0111' where 학생번호='30345';
+update 학생 set 학과번호 ='4004' where 학생번호='40456';
+update 학생 set 학과번호 ='5005' where 학생번호='50678';
+update 학생 set 학과번호 ='1001' where 학생번호='60789';
+update 학생 set 학과번호 ='2002' where 학생번호='70890';
+update 학생 set 학과번호 ='0111' where 학생번호='80901';
+update 학생 set 학과번호 ='4004' where 학생번호='90012';
+
+ALTER TABLE 교수 ADD CONSTRAINT 교수_ibfk_1 FOREIGN KEY(학과번호) REFERENCES 학과(학과번호);
+ALTER TABLE 학생 ADD CONSTRAINT 학생_ibfk_1 FOREIGN KEY(학과번호) REFERENCES 학과(학과번호);
+
+-- 데이터변경후 확인
+SELECT * FROM information_schema.table_constraints WHERE TABLE_NAME = '교수';
+SELECT * FROM information_schema.table_constraints WHERE TABLE_NAME = '학생';
 
 -- 7번 교수관련자료삭제
 SELECT * FROM 교수와학생 ORDER BY 교수번호 ASC;
